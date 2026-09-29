@@ -5,7 +5,7 @@
  *   registerPatchAction — concrete patch proposal (rkey=patchaction-{actionId})
  *   getBlastRadius      — composite read: cveId → all affected artifacts + apps
  *
- * The patch SLA from sbom CLAUDE.md:
+ * The patch SLA from sbom AGENTS.md:
  *   Critical (≥9.0)  → 24h
  *   High     (≥7.0)  → 72h
  *   Medium   (≥4.0)  → 168h
@@ -33,7 +33,7 @@ const PATCH_POLICY_COLLECTION = "com.etzhayyim.apps.sbom.patchPolicy";
 const PATCH_ACTION_COLLECTION = "com.etzhayyim.apps.sbom.patchAction";
 const VULN_MATCH_COLLECTION = "com.etzhayyim.apps.sbom.vulnMatch";
 
-/** Default SLA windows (from sbom CLAUDE.md). */
+/** Default SLA windows (from sbom AGENTS.md). */
 export const DEFAULT_SLA_HOURS = {
   critical: 24,
   high: 72,
