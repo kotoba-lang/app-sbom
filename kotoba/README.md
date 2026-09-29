@@ -19,7 +19,7 @@ Vendor canonical lexicons (`registerArtifact / cveIngestOsv / recall /
 health`) are all covered + the extended graph (Component / VulnMatch /
 PatchPolicy / PatchAction / analytics).
 
-## Authority-chain DIDs (per sbom CLAUDE.md)
+## Authority-chain DIDs (per sbom AGENTS.md)
 
 ```
 did:web:sbom.etzhayyim.com                                — controller
@@ -101,4 +101,4 @@ Option C (IPFS) rejected — SBOM records are small structured data, not blobs.
 - [ADR-2605172000](../../../90-docs/adr/2605172000-etzhayyim-kotoba-substrate.md) — kotoba substrate
 - [hanrei kotoba](../../etzhayyim-project-hanrei/kotoba/) — Option B reference (31/31 complete)
 - [ipaddress kotoba](../../etzhayyim-project-ipaddress/kotoba/) — Option B reference (37/37 complete)
-- [sbom CLAUDE.md](../CLAUDE.md) — actor design + graph relationships
+- [sbom AGENTS.md](../AGENTS.md) — actor design + graph relationships
