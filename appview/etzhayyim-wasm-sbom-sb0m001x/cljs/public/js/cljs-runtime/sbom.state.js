@@ -1,0 +1,4 @@
+goog.provide('sbom.state');
+sbom.state.app_info = cljs.core.PersistentHashMap.fromArrays([new cljs.core.Keyword(null,"routes","routes",457900162),new cljs.core.Keyword(null,"xrpc","xrpc",-1294004094),new cljs.core.Keyword(null,"relative-path","relative-path",1848635172),new cljs.core.Keyword(null,"route-count","route-count",-1535759193),new cljs.core.Keyword(null,"name","name",1843675177),new cljs.core.Keyword(null,"title","title",636505583),new cljs.core.Keyword(null,"project","project",1124394579),new cljs.core.Keyword(null,"kind","kind",-717265803),new cljs.core.Keyword(null,"vars","vars",-2046957217)],[cljs.core.PersistentVector.EMPTY,true,"60-apps/etzhayyim-project-sbom/appview/etzhayyim-wasm-sbom-sb0m001x/svelte/src/routes/+page.svelte",(0),"etzhayyim-wasm-sbom-sb0m001x","Sbom Sb0m001x","etzhayyim-project-sbom","appview",cljs.core.PersistentVector.EMPTY]);
+
+//# sourceMappingURL=sbom.state.js.map
