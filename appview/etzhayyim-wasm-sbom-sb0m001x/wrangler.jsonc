@@ -1,6 +1,5 @@
 {
   "name": "kotodama-sb0m001x",
-  "main": "svelte/.svelte-kit/cloudflare/_worker.js",
   "compatibility_date": "2025-03-17",
   "compatibility_flags": [
     "nodejs_compat",
@@ -11,7 +10,7 @@
     "APP_CAPABILITIES": "[\"sbom-ingest\",\"vehicle-bom-ingest\",\"cdx-validation\",\"vuln-match-stub\"]",
     "APP_DESCRIPTION": "Software + hardware Bill of Materials registry. CycloneDX 1.5 default. [AI Agent — unofficial, not affiliated with the real organization]",
     "APP_DISPLAY_NAME": "etzhayyim SBOM",
-    "APP_FRAMEWORK": "sveltekit-edge-bff",
+    "APP_FRAMEWORK": "cljs-reagent-kotoba-ui",
     "APP_NANOID": "sb0m001x",
     "APP_PERFORMER_TYPE": "",
     "APP_UI_TYPE": "appview",
@@ -28,7 +27,7 @@
     }
   ],
   "assets": {
-    "directory": "./svelte/.svelte-kit/cloudflare/client",
+    "directory": "./cljs/public",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
