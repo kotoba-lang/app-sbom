@@ -1,0 +1,25 @@
+(ns sbom.match-parity-test
+  "aiueos/sbom_match.cljk（判定コア）と正本 vulnRegistry.ts の規則の parity。
+  TS は .js 拡張子 import のため node 直接実行不可 → ソース一致検査
+  （規則が変われば落ちる drift 検出）。実行 parity は正本の vitest が担う。"
+  (:require [clojure.test :refer [deftest is testing]]
+            [clojure.string :as str]
+            ["fs" :as fs]))
+
+(def src
+  (fs/readFileSync (str/join "/" ["kotoba" "src" "vulnRegistry.ts"]) "utf8"))
+
+(deftest match-rules-match-guest
+  (testing "guest test-missing: missingRequiredFields 拒否"
+    (is (str/includes? src "missingRequiredFields")))
+  (testing "guest test-unknown-component: componentId が registry 外は vulnMatchNotFound"
+    (is (str/includes? src "vulnMatchNotFound"))
+    (is (str/includes? src "componentRegistry.has")))
+  (testing "guest test-admission: 入力の別名正規化（cveId ?? cvId / purl ?? componentId）"
+    (is (str/includes? src "input.cveId ?? input.cvId"))
+    (is (str/includes? src "input.componentPurl ?? input.componentId")))
+  (testing "guest test-dedup: (cveId x purl) は冪等（alreadyExists）"
+    (is (str/includes? src "alreadyExists")))
+  (testing "guest test-ranges: matchConfidencePermille / cvssPermille"
+    (is (str/includes? src "matchConfidencePermille"))
+    (is (str/includes? src "cvssPermille"))))

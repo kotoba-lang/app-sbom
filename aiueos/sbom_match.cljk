@@ -1,0 +1,72 @@
+(ns sbom.match
+  "vuln match admission 判定コア — itonami dapp bundle（pure, :effects #{}）。
+
+  CVE x コンポーネント照合の記録（VulnMatch）の判定
+  （正本: kotoba/src/vulnRegistry.ts の registerVulnMatch）:
+
+  - 入力の正規化: cveId / cvId、componentPurl / componentId の別名を受ける。
+  - **必須の欠落は拒否**（missingRequiredFields）。componentId が与えられて
+    いて registry に無いなら拒否（vulnMatchNotFound）。purl 直指定は通す。
+  - **(cveId x purl) は冪等**: 同一 rkey は alreadyExists（dedup）。
+  - matchConfidencePermille は **0..1000**、cvssPermille は **0..10000**
+    （10.0 = 10000）の閉じた範囲。
+
+  match-admission の戻り: 0 = 記録可 / 1 = missingRequiredFields
+    / 2 = vulnMatchNotFound（componentId が registry 外）
+  dedup-take: 1 = alreadyExists（既存を返す）/ 0 = 新規
+  confidence-ok / cvss-ok: 1 = 閉じた範囲内
+
+  実行 host はスカラーのみ = KIR v3 / i64/direct ABI（kernel/selfhost 両対応）。
+
+  テストはゼロ引数 test-*、戻り 1/0:
+  <amu> test aiueos/sbom_match.cljk"
+  (:export [main match-admission dedup-take confidence-ok cvss-ok
+            test-admission test-missing test-unknown-component
+            test-dedup test-ranges test-fail-closed]))
+
+(defn main [] :i64
+  0)
+
+(defn match-admission [has-cve :i64 has-purl :i64 has-component-id :i64 component-found :i64] :i64
+  (if (or (= has-cve 0) (= has-purl 0))
+    1
+    (if (and (= has-component-id 1) (= component-found 0))
+      2
+      0)))
+
+(defn dedup-take [same-rkey :i64 has-existing :i64] :i64
+  (if (and (= same-rkey 1) (= has-existing 1)) 1 0))
+
+(defn confidence-ok [permille :i64] :i64
+  (if (and (>= permille 0) (<= permille 1000)) 1 0))
+
+(defn cvss-ok [permille :i64] :i64
+  (if (and (>= permille 0) (<= permille 10000)) 1 0))
+
+;; --- tests（戻り 1 = pass） ------------------------------------------------
+
+(defn test-admission [] :i64
+  ;; purl 直指定（componentId 無し）は通る
+  (if (= (+ (match-admission 1 1 0 0) (match-admission 1 1 1 1)) 0) 1 0))
+
+(defn test-missing [] :i64
+  (if (= (+ (match-admission 0 1 0 0) (match-admission 1 0 0 0)) 2) 1 0))
+
+(defn test-unknown-component [] :i64
+  ;; componentId があるが registry 外は拒否
+  (if (= (match-admission 1 1 1 0) 2) 1 0))
+
+(defn test-dedup [] :i64
+  ;; (cveId x purl) は冪等
+  (if (= (+ (dedup-take 1 1) (dedup-take 1 0) (dedup-take 0 1)) 1) 1 0))
+
+(defn test-ranges [] :i64
+  ;; confidence 0..1000 / cvss 0..10000
+  (if (= (+ (confidence-ok 0) (confidence-ok 1000) (confidence-ok 1001)
+            (cvss-ok 0) (cvss-ok 10000) (cvss-ok 10001))
+         4)
+    1 0))
+
+(defn test-fail-closed [] :i64
+  ;; 範囲外は拒否（負も含む）
+  (if (= (+ (confidence-ok -1) (cvss-ok -5)) 0) 1 0))
