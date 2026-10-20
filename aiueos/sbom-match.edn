@@ -1,0 +1,18 @@
+;; app-sbom — itonami（dapp）の aiueos アプリ記述子（notes.edn 形）。
+;; 判定コアは aiueos/sbom_match.cljk（vuln match の admission・冪等・範囲判定）。
+;; 正本は kotoba/src/vulnRegistry.ts（registerVulnMatch）。pure（:effects #{}）。
+{:aiueos/component :app/sbom-match
+ :aiueos/kind :app
+ :aiueos/trust :untrusted
+ :aiueos/source "sbom_match.cljk"
+ :aiueos/wasm "sbom_match.wasm"
+ :aiueos/entry "main"
+ :aiueos/args []
+ :aiueos/imports #{}
+ :aiueos/exports #{:app/main
+                   :app/match-admission
+                   :app/dedup-take
+                   :app/confidence-ok
+                   :app/cvss-ok}
+ :aiueos/effects #{}
+ :aiueos/limits {:memory-pages 16 :fuel 5000000}}
