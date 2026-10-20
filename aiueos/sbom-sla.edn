@@ -1,0 +1,18 @@
+;; app-sbom — itonami（dapp）の aiueos アプリ記述子（notes.edn 形）。
+;; 判定コアは aiueos/sbom_sla.cljk（パッチ SLA の tier・時間・overdue 判定）。
+;; 正本は kotoba/src/analyze.ts + patchRegistry.ts + AGENTS.md の SLA 表。
+;; pure（:effects #{}）。
+{:aiueos/component :app/sbom-sla
+ :aiueos/kind :app
+ :aiueos/trust :untrusted
+ :aiueos/source "sbom_sla.cljk"
+ :aiueos/wasm "sbom_sla.wasm"
+ :aiueos/entry "main"
+ :aiueos/args []
+ :aiueos/imports #{}
+ :aiueos/exports #{:app/main
+                   :app/severity-tier
+                   :app/sla-hours
+                   :app/sla-ok}
+ :aiueos/effects #{}
+ :aiueos/limits {:memory-pages 16 :fuel 5000000}}

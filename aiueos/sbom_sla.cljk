@@ -1,0 +1,75 @@
+(ns sbom.sla
+  "SBOM SLA 判定コア — itonami dapp bundle（pure, :effects #{}）。
+
+  パッチ SLA の判定（正本: kotoba/src/analyze.ts + patchRegistry.ts、
+  SLA 表は AGENTS.md の明文）:
+
+  - **CVSS による tier**: ≥9.0 Critical → 24h / ≥7.0 High → 72h
+    / ≥4.0 Medium → 168h / <4.0 Low → 720h。severity none は Low 扱い。
+  - policy が個別の SLA 時間を持てば**上書き**、無ければ既定。
+  - 期限 = discoveredAt + hours。**残り時間は負になりうる = overdue**。
+
+  severity-tier の戻り: 0 critical / 1 high / 2 medium / 3 low
+  （入力は CVSS を 10 倍した整数: 90 = 9.0）
+  sla-hours: tier の SLA 時間（policy 上書きありならそれ）
+  sla-ok: 1 = 期限内（remaining >= 0）/ 0 = overdue
+
+  実行 host はスカラーのみ = KIR v3 / i64/direct ABI（kernel/selfhost 両対応）。
+
+  テストはゼロ引数 test-*、戻り 1/0:
+  <amu> test aiueos/sbom_sla.cljk"
+  (:export [main severity-tier sla-hours sla-ok
+            test-tier test-tier-bounds test-hours test-override
+            test-overdue test-fail-closed]))
+
+(defn main [] :i64
+  0)
+
+(defn severity-tier [cvss-x10 :i64] :i64
+  (if (>= cvss-x10 90)
+    0
+    (if (>= cvss-x10 70)
+      1
+      (if (>= cvss-x10 40) 2 3))))
+
+(defn sla-hours [tier :i64 has-policy :i64 policy-hours :i64] :i64
+  (if (= has-policy 1)
+    policy-hours
+    (if (= tier 0)
+      24
+      (if (= tier 1)
+        72
+        (if (= tier 2)
+          168
+          (if (= tier 3) 720 -1))))))
+
+(defn sla-ok [remaining-ms :i64] :i64
+  (if (>= remaining-ms 0) 1 0))
+
+;; --- tests（戻り 1 = pass） ------------------------------------------------
+
+(defn test-tier [] :i64
+  (if (= (+ (severity-tier 90) (severity-tier 100) (severity-tier 95)) 0) 1 0))
+
+(defn test-tier-bounds [] :i64
+  ;; 89→high(1) / 70→high(1) / 69→medium(2) / 40→medium(2) / 39→low(3) / 0→low(3)
+  (if (= (+ (severity-tier 89) (severity-tier 70) (severity-tier 69)
+            (severity-tier 40) (severity-tier 39) (severity-tier 0))
+         12)
+    1 0))
+
+(defn test-hours [] :i64
+  ;; 既定: 24 / 72 / 168 / 720
+  (if (= (+ (sla-hours 0 0 0) (sla-hours 1 0 0) (sla-hours 2 0 0) (sla-hours 3 0 0)) 984) 1 0))
+
+(defn test-override [] :i64
+  ;; policy の個別 SLA が既定を上書き
+  (if (= (+ (sla-hours 0 1 4) (sla-hours 1 1 8)) 12) 1 0))
+
+(defn test-overdue [] :i64
+  ;; 残り時間が負 = overdue
+  (if (= (+ (sla-ok 100) (sla-ok 0) (sla-ok -1)) 2) 1 0))
+
+(defn test-fail-closed [] :i64
+  ;; 未知 tier は -1（既定を作らない）
+  (if (= (sla-hours 9 0 0) -1) 1 0))
