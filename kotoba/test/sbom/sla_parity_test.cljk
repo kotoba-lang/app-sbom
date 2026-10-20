@@ -1,0 +1,25 @@
+(ns sbom.sla-parity-test
+  "aiueos/sbom_sla.cljk（判定コア）と正本ピン値（patchRegistry.ts の SLA 表 /
+  DEFAULT_SLA_HOURS、AGENTS.md の CVSS 境界）の parity。規約が変われば落ちる。"
+  (:require [clojure.test :refer [deftest is testing]]
+            [clojure.string :as str]
+            ["fs" :as fs]))
+
+(def agents (fs/readFileSync "AGENTS.md" "utf8"))
+(def patch-registry
+  (fs/readFileSync (str/join "/" ["kotoba" "src" "patchRegistry.ts"]) "utf8"))
+
+(deftest sla-conventions-match-guest
+  (testing "guest test-tier-bounds: CVSS 境界（>=9.0 / >=7.0 / >=4.0 / <4.0）"
+    (is (str/includes? patch-registry "≥9.0"))
+    (is (str/includes? patch-registry "≥7.0"))
+    (is (str/includes? patch-registry "≥4.0"))
+    (is (str/includes? patch-registry "<4.0")))
+  (testing "guest test-hours: 既定 SLA（24h / 72h / 168h / 720h）"
+    (is (str/includes? patch-registry "24h"))
+    (is (str/includes? patch-registry "72h"))
+    (is (str/includes? patch-registry "168h"))
+    (is (str/includes? patch-registry "720h")))
+  (testing "guest test-override: policy が個別 SLA を上書き"
+    (is (str/includes? patch-registry "DEFAULT_SLA_HOURS"))
+    (is (str/includes? patch-registry "slaHoursCritical"))))
